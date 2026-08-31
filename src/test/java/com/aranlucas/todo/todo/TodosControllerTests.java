@@ -54,14 +54,12 @@ class TodosControllerTests {
         var result = controller.newTodo(new CreateTodoRequest("Ship the API"), principal);
 
         assertThat(result.content()).isEqualTo("Ship the API");
-        assertThat(result.email()).isEqualTo("test@test.com");
         verify(todoService).save(any(Todo.class));
     }
 
     @Test
     void doesNotReturnAnotherUsersTodo() {
-        when(todoService.findById(42L))
-                .thenReturn(java.util.Optional.of(new Todo("Private", "other@test.com")));
+        when(todoService.findById(42L, "test@test.com")).thenReturn(java.util.Optional.empty());
 
         assertThatThrownBy(() -> controller.getTodo(42L, principal))
                 .isInstanceOf(TodoNotFoundException.class);

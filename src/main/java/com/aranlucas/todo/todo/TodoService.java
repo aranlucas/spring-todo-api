@@ -24,19 +24,19 @@ public class TodoService {
     }
 
     @Transactional
-    @CachePut(cacheNames = "todos", key = "#result.id")
+    @CachePut(cacheNames = "todos", key = "{#result.email, #result.id}")
     public Todo save(Todo todo) {
         return todoRepository.save(todo);
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "todos", key = "#id")
-    public Optional<Todo> findById(Long id) {
-        return todoRepository.findById(id);
+    @Cacheable(cacheNames = "todos", key = "{#email, #id}")
+    public Optional<Todo> findById(Long id, String email) {
+        return todoRepository.findByIdAndEmail(id, email);
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "todos", key = "#id")
+    @CacheEvict(cacheNames = "todos", key = "{#email, #id}")
     public void deleteById(Long id, String email) {
         if (todoRepository.deleteByIdAndEmail(id, email) == 0) {
             throw new TodoNotFoundException(id);
