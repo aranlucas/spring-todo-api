@@ -1,3 +1,4 @@
--XX:+UseSerialGC
--Xss512k
--XX:MaxRAM=72m
+-XX:MaxRAMPercentage=75.0
+-XX:InitialRAMPercentage=25.0
+-XX:+ExitOnOutOfMemoryError
+-Dfile.encoding=UTF-8

@@ -1,67 +1,81 @@
 plugins {
-	id "java"
-	id "com.diffplug.spotless" version "6.21.0"
-	id "io.freefair.lombok" version "8.3"
-	id 'io.spring.dependency-management' version '1.1.3'
-	id 'org.springframework.boot' version '3.1.4'
+	id 'java'
+	id 'com.diffplug.spotless' version '8.10.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.springframework.boot' version '4.1.1'
 }
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+group = 'com.aranlucas'
+version = '1.0.0-SNAPSHOT'
 
-tasks.jar {
-	enabled = false
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 repositories {
 	mavenCentral()
-	maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	implementation 'org.projectlombok:lombok:1.18.30'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
-	implementation 'org.springframework.boot:spring-boot-gradle-plugin:3.1.4'
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.modulith:spring-modulith-starter-core'
 	runtimeOnly 'org.postgresql:postgresql'
+	testImplementation 'org.springframework.boot:spring-boot-data-jpa-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
+	testRuntimeOnly 'com.h2database:h2'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom 'org.springframework.modulith:spring-modulith-bom:2.1.1'
+	}
+}
+
+springBoot {
+	buildInfo()
+}
+
+tasks.named('bootJar') {
+	archiveFileName = 'spring-todo-api.jar'
+}
+
+tasks.named('jar') {
+	enabled = false
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
-dependencyManagement {
-	imports {
-		mavenBom 'org.springframework.modulith:spring-modulith-bom:1.0.1'
-	}
-}
-
 spotless {
 	format 'misc', {
-		// define the files to apply `misc` to
-		target '*.gradle', '*.md', '.gitignore'
-
-		// define the steps to apply to those files
+		target '*.gradle', '*.properties', '*.toml', '*.yml', '.gitignore'
 		trimTrailingWhitespace()
-		indentWithTabs()
+		endWithNewline()
+	}
+	format 'markdown', {
+		target 'README.md', 'docs/**/*.md'
+		trimTrailingWhitespace()
 		endWithNewline()
 	}
 	java {
 		importOrder()
 		removeUnusedImports()
-
 		cleanthat()
-		// apply a specific flavor of google-java-format
 		googleJavaFormat().aosp()
-		// fix formatting of type annotations
 		formatAnnotations()
 	}
 }

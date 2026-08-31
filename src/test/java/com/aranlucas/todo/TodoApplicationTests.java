@@ -1,17 +1,14 @@
-package com.example.app;
+package com.aranlucas.todo;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
 import org.springframework.modulith.docs.Documenter;
 
-class ApplicationTests {
+class TodoApplicationTests {
 
     @Test
-    void writeDocumentationSnippets() {
-
-        var modules = ApplicationModules.of(Application.class).verify();
-        modules.forEach(System.out::println);
-
+    void applicationModulesAreValid() {
+        var modules = ApplicationModules.of(TodoApplication.class).verify();
         new Documenter(modules).writeModulesAsPlantUml().writeIndividualModulesAsPlantUml();
     }
 }

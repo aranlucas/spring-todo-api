@@ -1,23 +1,30 @@
-auth0:
-  audience: https://springboot-java-production-f5e9.up.railway.app/
 spring:
+  application:
+    name: spring-todo-api
   config:
-    import: optional:dev.properties
-  jpa:
-    hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    import: optional:file:./dev.properties
   datasource:
-    password: ${PGPASSWORD}
-    username: ${PGUSER}
     url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME:${PGUSER}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${PGPASSWORD}}
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
   cache:
     type: redis
     redis:
-      time-to-live: '600000'
+      time-to-live: 10m
   data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
     redis:
-      url: ${REDIS_DATASOURCE_URL}
+      url: ${REDIS_URL:${REDIS_DATASOURCE_URL}}
   security:
     oauth2:
       client:
@@ -32,19 +39,31 @@ spring:
               - email
         provider:
           auth0:
-            issuer-uri: https://dev-ntzoif436jqcr1ml.us.auth0.com/
+            issuer-uri: ${AUTH0_ISSUER_URI}
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-logging:
-  level:
-    root: ERROR
-    org.springframework.web: ERROR
-    com.auth0.example: TRACE
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  info:
+    env:
+      enabled: false
 
 server:
-  tomcat:
-    threads:
-      max: 1
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+  shutdown: graceful
+
+logging:
+  level:
+    root: INFO
