@@ -56,8 +56,7 @@ public class TodosController {
     public TodoResponse getTodo(
             @PathVariable Long id, @AuthenticationPrincipal OidcUser principal) {
         return todoService
-                .findById(id)
-                .filter(todo -> todo.getEmail().equals(principal.getEmail()))
+                .findById(id, principal.getEmail())
                 .map(TodoResponse::from)
                 .orElseThrow(() -> new TodoNotFoundException(id));
     }

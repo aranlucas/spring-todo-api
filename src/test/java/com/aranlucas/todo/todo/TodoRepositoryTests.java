@@ -16,6 +16,8 @@ class TodoRepositoryTests {
     void scopesDeletesToTheTodoOwner() {
         var todo = todoRepository.save(new Todo("Private", "test@test.com"));
 
+        assertThat(todoRepository.findByIdAndEmail(todo.getId(), "other@test.com")).isEmpty();
+        assertThat(todoRepository.findByIdAndEmail(todo.getId(), "test@test.com")).contains(todo);
         assertThat(todoRepository.deleteByIdAndEmail(todo.getId(), "other@test.com")).isZero();
         assertThat(todoRepository.findByEmail("test@test.com", PageRequest.of(0, 10)).getContent())
                 .hasSize(1);

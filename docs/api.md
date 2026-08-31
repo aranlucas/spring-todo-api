@@ -16,8 +16,7 @@ The response is a Spring `Page` containing only the authenticated user's todos. 
   "content": [
     {
       "id": 1,
-      "content": "Ship the API",
-      "email": "person@example.com"
+      "content": "Ship the API"
     }
   ]
 }
