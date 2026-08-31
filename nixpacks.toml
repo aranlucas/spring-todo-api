@@ -1,1 +1,8 @@
 providers = ["java"]
+
+[variables]
+NIXPACKS_JDK_VERSION = "21"
+JAVA_OPTS = "-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError -Dfile.encoding=UTF-8"
+
+[start]
+cmd = "java $JAVA_OPTS -Dserver.port=$PORT -jar build/libs/spring-todo-api.jar"

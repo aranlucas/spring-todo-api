@@ -1,1 +1,8 @@
-rootProject.name = 'springboot-java'
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+		mavenCentral()
+	}
+}
+
+rootProject.name = 'spring-todo-api'
