@@ -1,9 +1,16 @@
-# Spring Todo API
+# Spring Todo API · A small API with real ownership boundaries
+
+[![CI](https://github.com/aranlucas/spring-todo-api/actions/workflows/ci.yml/badge.svg)](https://github.com/aranlucas/spring-todo-api/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/aranlucas/spring-todo-api)](LICENSE)
 
 Spring Todo API is a small authenticated Spring Boot REST service for personal
 todo records. Auth0/OIDC supplies the user identity, PostgreSQL stores the
 durable records, Redis caches individual reads, and Flyway owns schema changes.
 Every todo query and mutation is scoped to the authenticated user's email.
+
+> **The ownership test:** sign in, create a todo, read it back, then try the
+> same URL as another user. The resource boundary is part of the API contract,
+> while Redis keeps repeat reads light.
 
 ## Run locally
 
