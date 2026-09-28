@@ -12,6 +12,10 @@ Every todo query and mutation is scoped to the authenticated user's email.
 > same URL as another user. The resource boundary is part of the API contract,
 > while Redis keeps repeat reads light.
 
+<p align="center">
+  <img src="docs/images/readme-overview.svg" alt="Spring Todo API flow from OIDC identity through owner-scoped REST to PostgreSQL and Redis" width="100%" />
+</p>
+
 ## Run locally
 
 Copy the example configuration, provide PostgreSQL, Redis, and Auth0 values, then start the app:
