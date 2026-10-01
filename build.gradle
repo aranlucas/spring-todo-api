@@ -8,6 +8,12 @@ plugins {
 group = 'com.aranlucas'
 version = '1.0.0-SNAPSHOT'
 
+// Keep the Jackson families aligned on patched releases until Spring Boot includes them.
+ext['jackson-2-bom.version'] = '2.21.7'
+ext['jackson-bom.version'] = '3.1.7'
+// Fix Tomcat authentication and authorization advisories in the current 11.0 line.
+ext['tomcat.version'] = '11.0.25'
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
