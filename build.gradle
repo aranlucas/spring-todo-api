@@ -1,3 +1,19 @@
+buildscript {
+	dependencies {
+		constraints {
+			classpath('org.apache.commons:commons-lang3:3.18.0') {
+				because 'Fix GHSA-j288-q9x7-2f5v in the build plugin classpath'
+			}
+			classpath('tools.jackson.core:jackson-core:3.1.7') {
+				because 'Use the patched Jackson parser in Spring Boot build tooling'
+			}
+			classpath('tools.jackson.core:jackson-databind:3.1.7') {
+				because 'Use the patched Jackson databind in Spring Boot build tooling'
+			}
+		}
+	}
+}
+
 plugins {
 	id 'java'
 	id 'com.diffplug.spotless' version '8.10.3'
@@ -7,6 +23,12 @@ plugins {
 
 group = 'com.aranlucas'
 version = '1.0.0-SNAPSHOT'
+
+// Keep the Jackson families aligned on patched releases until Spring Boot includes them.
+ext['jackson-2-bom.version'] = '2.21.7'
+ext['jackson-bom.version'] = '3.1.7'
+// Fix Tomcat authentication and authorization advisories in the current 11.0 line.
+ext['tomcat.version'] = '11.0.25'
 
 java {
 	toolchain {
