@@ -87,3 +87,29 @@ The repository includes Railway/Nixpacks deployment metadata. Use the
 Auth0, then check `/actuator/health/readiness` after deployment. The service is
 an intentionally small modular monolith; it has no public todo UI and no
 authorization beyond the OIDC session boundary.
+
+### Integration checks
+
+The default test suite uses the real HTTP/security filters, service proxies,
+repository, and production Flyway migration with H2 in PostgreSQL mode and a
+local in-memory cache. OIDC principals are supplied by Spring Security's test
+support; tests do not contact Auth0. The test profile extends the production
+configuration rather than replacing it, and Hibernate validates the migrated
+schema instead of creating it.
+
+To exercise the same HTTP contracts against disposable local PostgreSQL and
+Redis instances (Docker is not required):
+
+```shell
+TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/todo_test \
+TEST_DATABASE_USERNAME=todo_test \
+TEST_DATABASE_PASSWORD=local-test-only \
+TEST_CACHE_TYPE=redis \
+TEST_REDIS_URL=redis://localhost:6379/15 \
+./gradlew test --tests '*TodosHttpIntegrationTests' --rerun-tasks
+```
+
+Use an empty, dedicated test database and Redis database: the suite migrates the
+database, deletes todo rows, and clears the `todos` cache between tests. With
+Redis enabled, it also verifies the production ten-minute TTL configuration;
+the cached HTTP reads exercise Redis value serialization and owner-scoped keys.
