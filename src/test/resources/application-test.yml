@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: ${TEST_DATABASE_URL:jdbc:h2:mem:todo-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1}
+    username: ${TEST_DATABASE_USERNAME:sa}
+    password: ${TEST_DATABASE_PASSWORD:}
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.generate_statistics: true
+  cache:
+    type: ${TEST_CACHE_TYPE:simple}
+  data:
+    redis:
+      url: ${TEST_REDIS_URL:redis://localhost:6379}
+  security:
+    oauth2:
+      client:
+        registration:
+          auth0:
+            client-id: local-test-client
+            client-secret: local-test-secret
+        provider:
+          auth0:
+            issuer-uri: http://auth0.invalid
+logging:
+  level:
+    org.hibernate.stat: OFF
+    org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: OFF
