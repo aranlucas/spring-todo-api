@@ -4,10 +4,10 @@ buildscript {
 			classpath('org.apache.commons:commons-lang3:3.18.0') {
 				because 'Fix GHSA-j288-q9x7-2f5v in the build plugin classpath'
 			}
-			classpath('tools.jackson.core:jackson-core:3.1.7') {
+			classpath('tools.jackson.core:jackson-core:3.2.3') {
 				because 'Use the patched Jackson parser in Spring Boot build tooling'
 			}
-			classpath('tools.jackson.core:jackson-databind:3.1.7') {
+			classpath('tools.jackson.core:jackson-databind:3.2.3') {
 				because 'Use the patched Jackson databind in Spring Boot build tooling'
 			}
 		}
