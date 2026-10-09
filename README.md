@@ -18,15 +18,14 @@ Every todo query and mutation is scoped to the authenticated user's email.
 
 ## Run locally
 
-Use Java 21, Make, and Node.js 24 or newer. Install [Portless](https://github.com/vercel-labs/portless/tree/v0.15.7), copy the example configuration, and provide PostgreSQL, Redis, and Auth0 values:
+Copy the example configuration, provide PostgreSQL, Redis, and Auth0 values, then start the app:
 
 ```shell
-npm install -g portless@0.15.7
 cp dev.properties.example dev.properties
 make dev
 ```
 
-The API is available at `https://spring-todo-api.localhost`; its readiness endpoint is `/actuator/health/readiness` and Swagger UI is at `/swagger-ui.html`.
+`make dev` runs `./gradlew bootRun` through [Portless](https://github.com/vercel-labs/portless) (`npm install -g portless`); its first run may ask for `sudo` to bind port 443 and trust a local certificate. The API is available at `https://spring-todo-api.localhost` (register `https://spring-todo-api.localhost/login/oauth2/code/auth0` as the Auth0 callback); its readiness endpoint is `/actuator/health/readiness` and Swagger UI is at `/swagger-ui.html`.
 
 `dev.properties.example` expects:
 
@@ -38,23 +37,6 @@ The API is available at `https://spring-todo-api.localhost`; its readiness endpo
 
 Keep the copied `dev.properties` file ignored and put production values in the
 hosting platform's secret store.
-
-### Local development URLs
-
-`make dev` runs the existing Gradle `bootRun` task through Portless. The
-`server.port: ${PORT:8080}` setting receives the assigned port, and
-`--no-daemon` keeps that environment scoped to the Gradle invocation.
-
-For OIDC login, register the exact callback
-`https://spring-todo-api.localhost/login/oauth2/code/auth0` in your development
-Auth0 application. Use the printed hostname for a Git worktree or custom proxy
-configuration; callbacks are exact URLs. PostgreSQL and Redis continue using
-their configured connections.
-
-Portless starts a shared HTTPS proxy and may request local administrator access on
-first use to bind port 443 and trust its development certificate. Use the URL it
-prints if your proxy uses a custom port or domain. Stop the command with Ctrl+C;
-`portless doctor` checks local proxy, certificate, and DNS setup.
 
 ## Verify
 
