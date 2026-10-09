@@ -38,6 +38,38 @@ The API is available at `http://localhost:8080`; its readiness endpoint is `/act
 Keep the copied `dev.properties` file ignored and put production values in the
 hosting platform's secret store.
 
+### Named local URL (optional)
+
+Install [Portless](https://github.com/vercel-labs/portless/tree/v0.15.7) once with Node.js 24 or newer:
+
+```bash
+npm install -g portless@0.15.7
+```
+
+With the same PostgreSQL, Redis, and Auth0 configuration in `dev.properties`,
+run from the repository root:
+
+```bash
+make dev-portless
+```
+
+The API is available at `https://spring-todo-api.localhost`; append
+`/actuator/health/readiness` or `/swagger-ui.html` as usual. The existing
+`server.port: ${PORT:8080}` configuration receives the assigned port. The wrapper
+uses `--no-daemon` to keep that environment scoped to the Gradle invocation.
+`./gradlew bootRun` remains the direct development command.
+
+For OIDC login, register the exact callback
+`https://spring-todo-api.localhost/login/oauth2/code/auth0` in your development
+Auth0 application. Use the printed hostname for a Git worktree or custom proxy
+configuration; callbacks are exact URLs. PostgreSQL and Redis continue using
+their configured connections and are not routed through Portless.
+
+Portless starts a shared HTTPS proxy and may request local administrator access on
+first use to bind port 443 and trust its development certificate. Use the URL it
+prints if your proxy uses a custom port or domain. Stop the command with Ctrl+C;
+`portless doctor` checks local proxy, certificate, and DNS setup.
+
 ## Verify
 
 ```shell
