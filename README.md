@@ -39,13 +39,11 @@ The API is available at `https://spring-todo-api.localhost`; its readiness endpo
 Keep the copied `dev.properties` file ignored and put production values in the
 hosting platform's secret store.
 
-### Local URLs and direct development
+### Local development URLs
 
 `make dev` runs the existing Gradle `bootRun` task through Portless. The
 `server.port: ${PORT:8080}` setting receives the assigned port, and
 `--no-daemon` keeps that environment scoped to the Gradle invocation.
-Use `make dev-direct` for the original `./gradlew bootRun` behavior at
-`http://localhost:8080`.
 
 For OIDC login, register the exact callback
 `https://spring-todo-api.localhost/login/oauth2/code/auth0` in your development
