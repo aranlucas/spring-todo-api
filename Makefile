@@ -1,5 +1,8 @@
-.PHONY: dev-portless
+.PHONY: dev dev-direct
 
 # Keep the assigned PORT scoped to this Gradle invocation.
-dev-portless:
+dev:
 	portless run --name spring-todo-api ./gradlew --no-daemon bootRun
+
+dev-direct:
+	./gradlew bootRun
