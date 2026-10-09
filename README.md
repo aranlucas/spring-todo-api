@@ -22,10 +22,10 @@ Copy the example configuration, provide PostgreSQL, Redis, and Auth0 values, the
 
 ```shell
 cp dev.properties.example dev.properties
-./gradlew bootRun
+make dev
 ```
 
-The API is available at `http://localhost:8080`; its readiness endpoint is `/actuator/health/readiness` and Swagger UI is at `/swagger-ui.html`.
+`make dev` runs `./gradlew bootRun` through [Portless](https://github.com/vercel-labs/portless) (`npm install -g portless`); its first run may ask for `sudo` to bind port 443 and trust a local certificate. The API is available at `https://spring-todo-api.localhost` (register `https://spring-todo-api.localhost/login/oauth2/code/auth0` as the Auth0 callback); its readiness endpoint is `/actuator/health/readiness` and Swagger UI is at `/swagger-ui.html`.
 
 `dev.properties.example` expects:
 
