@@ -33,4 +33,4 @@ jobs:
         uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
 
       - name: Lint, test, and package
-        run: ./gradlew clean check bootJar
+        run: ./gradlew check bootJar
