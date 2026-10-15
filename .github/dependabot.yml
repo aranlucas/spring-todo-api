@@ -4,9 +4,21 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+
+multi-ecosystem-groups:
+  weekly-dependencies:
+    schedule:
+      interval: weekly
+      day: thursday
+      time: "06:00"
+      timezone: America/Los_Angeles
+    open-pull-requests-limit: 1
+
 updates:
   - package-ecosystem: "gradle" # See documentation for possible values
     directory: "/" # Location of package manifests
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-dependencies
     schedule:
       interval: "weekly"
       day: thursday
@@ -14,6 +26,8 @@ updates:
       timezone: America/Los_Angeles
   - package-ecosystem: "github-actions"
     directory: "/"
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-dependencies
     schedule:
       interval: "weekly"
       day: thursday
