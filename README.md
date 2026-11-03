@@ -1,104 +1,40 @@
-# Spring Todo API · A small API with real ownership boundaries
+# Spring Todo API
 
-[![CI](https://github.com/aranlucas/spring-todo-api/actions/workflows/ci.yml/badge.svg)](https://github.com/aranlucas/spring-todo-api/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/aranlucas/spring-todo-api)](LICENSE)
-
-Spring Todo API is a small authenticated Spring Boot REST service for personal
-todo records. Auth0/OIDC supplies the user identity, PostgreSQL stores the
-durable records, Redis caches individual reads, and Flyway owns schema changes.
-Every todo query and mutation is scoped to the authenticated user's email.
-
-> **The ownership test:** sign in, create a todo, read it back, then try the
-> same URL as another user. The resource boundary is part of the API contract,
-> while Redis keeps repeat reads light.
-
-<p align="center">
-  <img src="docs/images/readme-overview.svg" alt="Spring Todo API flow from OIDC identity through owner-scoped REST to PostgreSQL and Redis" width="100%" />
-</p>
+An Auth0/OIDC-authenticated REST API for personal todos, backed by PostgreSQL and Redis.
+See the [API contract](docs/api.md), [operations guide](docs/operations.md), and [feature roadmap](ROADMAP.md).
 
 ## Run locally
 
-Copy the example configuration, provide PostgreSQL, Redis, and Auth0 values, then start the app:
+Use Java 21, PostgreSQL, Redis, and [Portless](https://github.com/vercel-labs/portless).
+Copy the configuration and fill in the database, Redis, and Auth0 values before starting:
 
 ```shell
 cp dev.properties.example dev.properties
 make dev
 ```
 
-`make dev` runs `./gradlew bootRun` through [Portless](https://github.com/vercel-labs/portless) (`npm install -g portless`); its first run may ask for `sudo` to bind port 443 and trust a local certificate. The API is available at `https://spring-todo-api.localhost` (register `https://spring-todo-api.localhost/login/oauth2/code/auth0` as the Auth0 callback); its readiness endpoint is `/actuator/health/readiness` and Swagger UI is at `/swagger-ui.html`.
+`make dev` runs the Gradle `bootRun` task through Portless. Register
+`https://spring-todo-api.localhost/login/oauth2/code/auth0` as the Auth0 callback.
+The API is at `https://spring-todo-api.localhost`; sign in via `/oauth2/authorization/auth0`.
+Without Portless, run `./gradlew bootRun` and register the callback at
+`http://localhost:8080/login/oauth2/code/auth0` instead.
 
-`dev.properties.example` expects:
+## Configuration
 
-| Variable | Purpose |
-| --- | --- |
-| `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` | PostgreSQL connection. |
-| `REDIS_URL` | Redis connection for per-todo caching. |
-| `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_ISSUER_URI` | OIDC login and principal validation. |
-
-Keep the copied `dev.properties` file ignored and put production values in the
-hosting platform's secret store.
+[dev.properties.example](dev.properties.example) lists the required database, Redis,
+and Auth0 settings. The app imports `dev.properties` from the working directory;
+keep it ignored and store deployment credentials in the hosting platform's secret store.
 
 ## Verify
 
 ```shell
-./gradlew clean check bootJar
+./gradlew check bootJar
 ```
 
-See [API usage](docs/api.md), [architecture](docs/architecture.md), and [operations](docs/operations.md) for details. Keep credentials in the ignored `dev.properties` file or platform-managed environment variables.
-
-## API surface
-
-All todo operations require an authenticated browser session or valid session
-cookie. The current controller exposes:
-
-```text
-GET    /todos             paginated todos for the signed-in user
-POST   /todos             create a todo; ownership comes from OIDC
-GET    /todos/{id}        read one owned todo
-DELETE /todos/{id}        delete one owned todo
-```
-
-Swagger UI and the generated OpenAPI document are public for discovery, while
-the todo routes remain protected. A missing todo and another user's todo both
-return not found, so the API does not disclose ownership.
-
-## Architecture
-
-```mermaid
-flowchart LR
-  Request[HTTP request] --> Security[Spring Security + Auth0]
-  Security --> Controller[TodosController]
-  Controller --> Service[TodoService]
-  Service --> Cache[(Redis)]
-  Service --> Repository[TodoRepository]
-  Repository --> DB[(PostgreSQL)]
-  Flyway[Flyway migrations] --> DB
-```
-
-The package layout and ownership checks are documented in
-[docs/architecture.md](docs/architecture.md). `TodoApplicationTests` also
-verifies the Spring Modulith module arrangement. `open-in-view` is disabled so
-database work stays inside service transactions.
-
-## Deployment and status
-
-The repository includes Railway/Nixpacks deployment metadata. Use the
-[operations guide](docs/operations.md) to provision PostgreSQL, Redis, and
-Auth0, then check `/actuator/health/readiness` after deployment. The service is
-an intentionally small modular monolith; it has no public todo UI and no
-authorization beyond the OIDC session boundary.
-
-### Integration checks
-
-The default test suite uses the real HTTP/security filters, service proxies,
-repository, and production Flyway migration with H2 in PostgreSQL mode and a
-local in-memory cache. OIDC principals are supplied by Spring Security's test
-support; tests do not contact Auth0. The test profile extends the production
-configuration rather than replacing it, and Hibernate validates the migrated
-schema instead of creating it.
-
-To exercise the same HTTP contracts against disposable local PostgreSQL and
-Redis instances (Docker is not required):
+The default HTTP integration tests use H2 in PostgreSQL mode, the production Flyway
+migration, an in-memory cache, and test OIDC principals; they do not contact Auth0.
+They do not establish PostgreSQL or Redis compatibility. To check the HTTP contracts
+against disposable local PostgreSQL and Redis instances:
 
 ```shell
 TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/todo_test \
@@ -110,6 +46,7 @@ TEST_REDIS_URL=redis://localhost:6379/15 \
 ```
 
 Use an empty, dedicated test database and Redis database: the suite migrates the
-database, deletes todo rows, and clears the `todos` cache between tests. With
-Redis enabled, it also verifies the production ten-minute TTL configuration;
-the cached HTTP reads exercise Redis value serialization and owner-scoped keys.
+database, deletes todo rows, and clears the `todos` cache between tests. With Redis
+enabled, it also checks serialization, owner-scoped cache keys, and the ten-minute TTL.
+
+Licensed under the [MIT License](LICENSE).
