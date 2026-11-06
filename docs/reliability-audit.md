@@ -63,3 +63,11 @@ passes a nonexistent entity property into Spring Data, producing a
 `PropertyReferenceException` and HTTP 500 instead of a client error. Map that
 specific exception to HTTP 400 within the todo controller and preserve valid sort
 behavior with an HTTP regression. Reviewer found no further concrete defects.
+
+## CI follow-up
+
+First CI run (42307023657) rejected an outdated exception import at compile time.
+Corrected it to Spring Data 4's `org.springframework.data.core.PropertyReferenceException`
+and adjusted regression formatting. Tests/build have not passed yet; all execution
+remains in CI. Independent reviewer completed two static passes with no remaining
+concrete correctness findings.

@@ -242,7 +242,9 @@ class TodosHttpIntegrationTests {
         mvc.perform(delete("/todos/42").with(login).with(csrf()))
                 .andExpect(status().isForbidden());
         mvc.perform(
-                        post("/todos").with(login).with(csrf())
+                        post("/todos")
+                                .with(login)
+                                .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"content\":\"Never persisted\"}"))
                 .andExpect(status().isForbidden());
