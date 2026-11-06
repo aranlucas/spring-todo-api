@@ -92,9 +92,17 @@ jobs:
           python3 - <<'PYTHON'
           import xml.etree.ElementTree as ET
           root = ET.parse('build/test-results/test/TEST-com.aranlucas.todo.todo.TodosHttpIntegrationTests.xml').getroot()
-          for behavior in ['rejectsUnknownSortProperties', 'rejectsUnusableOwnerClaims', 'rolledBackCreationCannotBeReadFromCache']:
+          expected = {
+              'rejectsUnknownSortProperties': (1, "No property 'doesNotExist' found for type 'Todo'"),
+              'rejectsUnusableOwnerClaims': (4, 'Status expected:<403> but was:<200>'),
+              'rolledBackCreationCannotBeReadFromCache': (1, 'Status expected:<404> but was:<200>'),
+          }
+          for behavior, (count, message) in expected.items():
               cases = [case for case in root.findall('testcase') if case.attrib['name'].startswith(behavior)]
-              assert cases and all(case.find('failure') is not None for case in cases), behavior
+              assert len(cases) == count, (behavior, len(cases))
+              for case in cases:
+                  failure = case.find('failure')
+                  assert failure is not None and message in failure.attrib.get('message', ''), behavior
           PYTHON
 
       - name: Preserve baseline regression evidence

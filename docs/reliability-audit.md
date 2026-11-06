@@ -71,3 +71,11 @@ Corrected it to Spring Data 4's `org.springframework.data.core.PropertyReference
 and adjusted regression formatting. Tests/build have not passed yet; all execution
 remains in CI. Independent reviewer completed two static passes with no remaining
 concrete correctness findings.
+
+CI run 42307479492 passed `check bootJar` and all PostgreSQL/Redis HTTP contracts.
+Its baseline replay failed all six selected cases for the intended reasons: rollback
+read returned 200 instead of 404; all four unusable email cases returned 200 instead
+of 403; unknown sort threw PropertyReferenceException. Downloaded and inspected
+the XML artifact. The evidence verifier itself then failed because JUnit's default
+parameterized display names omit the method name. Added explicit case names and
+strengthened verification to require exact case counts and expected failure messages.

@@ -215,7 +215,7 @@ class TodosHttpIntegrationTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "rejectsUnusableOwnerClaims[{index}]")
     @NullAndEmptySource
     @ValueSource(strings = {"   ", "\t"})
     void rejectsUnusableOwnerClaims(String email) throws Exception {
