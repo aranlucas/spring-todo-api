@@ -43,6 +43,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
@@ -64,3 +65,51 @@ jobs:
           TEST_CACHE_TYPE: redis
           TEST_REDIS_URL: redis://localhost:6379/15
         run: ./gradlew test --tests '*TodosHttpIntegrationTests' --rerun-tasks
+
+      - name: Preserve test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: test-results
+          path: |
+            build/reports/tests/
+            build/test-results/
+
+      - name: Prove regressions fail against the audit baseline
+        env:
+          TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/todo_test
+          TEST_DATABASE_USERNAME: todo_test
+          TEST_DATABASE_PASSWORD: ci-test-only
+          TEST_CACHE_TYPE: redis
+          TEST_REDIS_URL: redis://localhost:6379/15
+        run: |
+          git show 844e3041f31d8f1e4004e0b906c9b04cd438ef94:src/main/java/com/aranlucas/todo/config/CacheConfig.java > src/main/java/com/aranlucas/todo/config/CacheConfig.java
+          git show 844e3041f31d8f1e4004e0b906c9b04cd438ef94:src/main/java/com/aranlucas/todo/todo/TodosController.java > src/main/java/com/aranlucas/todo/todo/TodosController.java
+          if ./gradlew test --tests '*TodosHttpIntegrationTests.rejectsUnknownSortProperties' --tests '*TodosHttpIntegrationTests.rejectsUnusableOwnerClaims' --tests '*TodosHttpIntegrationTests.rolledBackCreationCannotBeReadFromCache' --rerun-tasks; then
+            echo 'Expected the baseline to fail all regression behaviors'
+            exit 1
+          fi
+          python3 - <<'PYTHON'
+          import xml.etree.ElementTree as ET
+          root = ET.parse('build/test-results/test/TEST-com.aranlucas.todo.todo.TodosHttpIntegrationTests.xml').getroot()
+          expected = {
+              'rejectsUnknownSortProperties': (1, "No property 'doesNotExist' found for type 'Todo'"),
+              'rejectsUnusableOwnerClaims': (4, 'Status expected:<403> but was:<200>'),
+              'rolledBackCreationCannotBeReadFromCache': (1, 'Status expected:<404> but was:<200>'),
+          }
+          for behavior, (count, message) in expected.items():
+              cases = [case for case in root.findall('testcase') if case.attrib['name'].startswith(behavior)]
+              assert len(cases) == count, (behavior, len(cases))
+              for case in cases:
+                  failure = case.find('failure')
+                  assert failure is not None and message in failure.attrib.get('message', ''), behavior
+          PYTHON
+
+      - name: Preserve baseline regression evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: baseline-regression-results
+          path: |
+            build/reports/tests/
+            build/test-results/
