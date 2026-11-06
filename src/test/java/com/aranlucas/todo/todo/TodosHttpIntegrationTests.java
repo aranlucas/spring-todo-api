@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,8 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -52,6 +55,8 @@ class TodosHttpIntegrationTests {
     @Autowired private EntityManagerFactory entityManagerFactory;
     @Autowired private Flyway flyway;
     @Autowired private StringRedisTemplate redis;
+    @Autowired private TodoService service;
+    @Autowired private PlatformTransactionManager transactionManager;
 
     @BeforeEach
     void resetTodos() {
@@ -201,6 +206,64 @@ class TodosHttpIntegrationTests {
         mvc.perform(get("/todos/{id}", Long.MAX_VALUE).with(as(OWNER)))
                 .andExpect(status().isNotFound());
         mvc.perform(delete("/todos/{id}", Long.MAX_VALUE).with(as(OWNER)).with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void rejectsUnknownSortProperties() throws Exception {
+        mvc.perform(get("/todos").param("sort", "doesNotExist").with(as(OWNER)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"   ", "\t"})
+    void rejectsUnusableOwnerClaims(String email) throws Exception {
+        assertOwnerClaimDenied(email);
+    }
+
+    @Test
+    void rejectsOversizedOwnerClaims() throws Exception {
+        assertOwnerClaimDenied("x".repeat(256));
+    }
+
+    private void assertOwnerClaimDenied(String email) throws Exception {
+        var login =
+                oidcLogin()
+                        .idToken(
+                                token -> {
+                                    token.subject("subject-without-usable-email");
+                                    if (email != null) {
+                                        token.claim("email", email);
+                                    }
+                                });
+        mvc.perform(get("/todos").with(login)).andExpect(status().isForbidden());
+        mvc.perform(get("/todos/42").with(login)).andExpect(status().isForbidden());
+        mvc.perform(delete("/todos/42").with(login).with(csrf()))
+                .andExpect(status().isForbidden());
+        mvc.perform(
+                        post("/todos").with(login).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\":\"Never persisted\"}"))
+                .andExpect(status().isForbidden());
+        assertThat(repository.count()).isZero();
+    }
+
+    @Test
+    @EnabledIfEnvironmentVariable(named = "TEST_CACHE_TYPE", matches = "redis")
+    void rolledBackCreationCannotBeReadFromCache() throws Exception {
+        Long id =
+                new TransactionTemplate(transactionManager)
+                        .execute(
+                                transaction -> {
+                                    Todo todo = service.create("Rolled back", OWNER);
+                                    repository.flush();
+                                    transaction.setRollbackOnly();
+                                    return todo.getId();
+                                });
+        assertThat(id).isNotNull();
+        assertThat(repository.findById(id)).isEmpty();
+        mvc.perform(get("/todos/{id}", id).with(as(OWNER)))
                 .andExpect(status().isNotFound());
     }
 

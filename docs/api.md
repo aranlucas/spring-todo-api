@@ -25,6 +25,9 @@ curl --cookie cookies.txt \
 
 ## Security requirements
 
+Todo access requires a nonblank email claim of at most 255 characters; otherwise
+it returns `403`. Invalid sort properties return `400`.
+
 The authenticated email determines ownership; clients cannot choose an owner.
 Missing IDs and another user's IDs both return `404`, including after a cached
 read. Email is the persistent ownership key, so changing the identity provider's
