@@ -33,7 +33,8 @@ keep it ignored and store deployment credentials in the hosting platform's secre
 
 The default HTTP integration tests use H2 in PostgreSQL mode, the production Flyway
 migration, an in-memory cache, and test OIDC principals; they do not contact Auth0.
-They do not establish PostgreSQL or Redis compatibility. To check the HTTP contracts
+CI also runs the HTTP suite against disposable PostgreSQL and Redis services,
+including the Redis serialization and TTL test. To check the HTTP contracts
 against disposable local PostgreSQL and Redis instances:
 
 ```shell
