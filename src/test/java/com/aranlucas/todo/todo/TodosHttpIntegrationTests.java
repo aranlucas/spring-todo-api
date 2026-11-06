@@ -239,14 +239,13 @@ class TodosHttpIntegrationTests {
                                 });
         mvc.perform(get("/todos").with(login)).andExpect(status().isForbidden());
         mvc.perform(get("/todos/42").with(login)).andExpect(status().isForbidden());
-        mvc.perform(delete("/todos/42").with(login).with(csrf()))
-                .andExpect(status().isForbidden());
+        mvc.perform(delete("/todos/42").with(login).with(csrf())).andExpect(status().isForbidden());
         mvc.perform(
                         post("/todos")
                                 .with(login)
                                 .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"content\":\"Never persisted\"}"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"content\":\"Never persisted\"}"))
                 .andExpect(status().isForbidden());
         assertThat(repository.count()).isZero();
     }
@@ -265,8 +264,7 @@ class TodosHttpIntegrationTests {
                                 });
         assertThat(id).isNotNull();
         assertThat(repository.findById(id)).isEmpty();
-        mvc.perform(get("/todos/{id}", id).with(as(OWNER)))
-                .andExpect(status().isNotFound());
+        mvc.perform(get("/todos/{id}", id).with(as(OWNER))).andExpect(status().isNotFound());
     }
 
     private long createTodo(String owner, String content) throws Exception {
