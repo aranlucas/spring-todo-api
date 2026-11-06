@@ -13,21 +13,20 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                        authorize ->
-                                authorize
-                                        .requestMatchers(
-                                                "/actuator/health",
-                                                "/actuator/health/**",
-                                                "/swagger-ui.html",
-                                                "/swagger-ui/**",
-                                                "/v3/api-docs/**",
-                                                "/oauth2/**",
-                                                "/login/**",
-                                                "/error")
-                                        .permitAll()
-                                        .anyRequest()
-                                        .authenticated())
+        http.authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers(
+                                        "/actuator/health",
+                                        "/actuator/health/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**",
+                                        "/oauth2/**",
+                                        "/login/**",
+                                        "/error")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated())
                 .oauth2Login(Customizer.withDefaults())
                 .logout(Customizer.withDefaults());
         return http.build();
