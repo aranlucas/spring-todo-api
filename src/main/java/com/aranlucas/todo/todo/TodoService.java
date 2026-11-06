@@ -25,8 +25,8 @@ public class TodoService {
 
     @Transactional
     @CachePut(cacheNames = "todos", key = "{#result.email, #result.id}")
-    public Todo save(Todo todo) {
-        return todoRepository.save(todo);
+    public Todo create(String content, String email) {
+        return todoRepository.save(new Todo(content, email));
     }
 
     @Transactional(readOnly = true)

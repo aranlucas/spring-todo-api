@@ -47,8 +47,7 @@ public class TodosController {
     public TodoResponse newTodo(
             @Valid @RequestBody CreateTodoRequest request,
             @AuthenticationPrincipal OidcUser principal) {
-        return TodoResponse.from(
-                todoService.save(new Todo(request.content(), principal.getEmail())));
+        return TodoResponse.from(todoService.create(request.content(), principal.getEmail()));
     }
 
     @GetMapping("/{id}")
