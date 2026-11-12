@@ -230,13 +230,12 @@ class TodosHttpIntegrationTests {
     private void assertOwnerClaimDenied(String email) throws Exception {
         var login =
                 oidcLogin()
-                        .idToken(
-                                token -> {
-                                    token.subject("subject-without-usable-email");
-                                    if (email != null) {
-                                        token.claim("email", email);
-                                    }
-                                });
+                        .idToken(token -> {
+                            token.subject("subject-without-usable-email");
+                            if (email != null) {
+                                token.claim("email", email);
+                            }
+                        });
         mvc.perform(get("/todos").with(login)).andExpect(status().isForbidden());
         mvc.perform(get("/todos/42").with(login)).andExpect(status().isForbidden());
         mvc.perform(delete("/todos/42").with(login).with(csrf())).andExpect(status().isForbidden());
@@ -255,13 +254,12 @@ class TodosHttpIntegrationTests {
     void rolledBackCreationCannotBeReadFromCache() throws Exception {
         Long id =
                 new TransactionTemplate(transactionManager)
-                        .execute(
-                                transaction -> {
-                                    Todo todo = service.create("Rolled back", OWNER);
-                                    repository.flush();
-                                    transaction.setRollbackOnly();
-                                    return todo.getId();
-                                });
+                        .execute(transaction -> {
+                            Todo todo = service.create("Rolled back", OWNER);
+                            repository.flush();
+                            transaction.setRollbackOnly();
+                            return todo.getId();
+                        });
         assertThat(id).isNotNull();
         assertThat(repository.findById(id)).isEmpty();
         mvc.perform(get("/todos/{id}", id).with(as(OWNER))).andExpect(status().isNotFound());
