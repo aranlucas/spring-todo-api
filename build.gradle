@@ -16,9 +16,9 @@ buildscript {
 
 plugins {
 	id 'java'
-	id 'com.diffplug.spotless' version '8.11.0'
+	id 'com.diffplug.spotless' version '8.12.0'
 	id 'io.spring.dependency-management' version '1.1.7'
-	id 'org.springframework.boot' version '4.1.2'
+	id 'org.springframework.boot' version '4.2.0'
 }
 
 group = 'com.aranlucas'
@@ -43,7 +43,7 @@ repositories {
 dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	implementation 'org.flywaydb:flyway-database-postgresql'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.1'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -64,7 +64,7 @@ dependencies {
 
 dependencyManagement {
 	imports {
-		mavenBom 'org.springframework.modulith:spring-modulith-bom:2.1.2'
+		mavenBom 'org.springframework.modulith:spring-modulith-bom:2.2.0'
 	}
 }
 
